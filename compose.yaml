@@ -1,9 +1,84 @@
+version: '3.8'
+
 services:
-  postgres:
-    image: 'postgres:latest'
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0
+    container_name: book_mysql
+    restart: unless-stopped
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      MYSQL_DATABASE: book_db
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: bookuser
+      MYSQL_PASSWORD: bookpassword
+      # Optional: Set timezone
+      TZ: UTC
     ports:
-      - '5432'
+      - "3307:3306"  # Host:Container (using 3307 to avoid conflicts with local MySQL)
+    volumes:
+      - mysql_data:/var/lib/mysql  # Persist data
+      - ./mysql-init:/docker-entrypoint-initdb.d  # Initialization scripts
+    networks:
+      - book-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+  # Spring Boot Application Service
+  book-app:
+    build: .
+    container_name: book_app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy  # Wait for MySQL to be healthy
+    environment:
+      # Override application properties with environment variables
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/book_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: bookuser
+      SPRING_DATASOURCE_PASSWORD: bookpassword
+      # Optional: JVM Options
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    ports:
+      - "8080:8080"
+    networks:
+      - book-network
+    volumes:
+      - ./logs:/app/logs  # Mount logs directory
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Optional: phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: book_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: bookuser
+      PMA_PASSWORD: bookpassword
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "8081:80"
+    networks:
+      - book-network
+
+# Networks
+networks:
+  book-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  mysql_data:
+    driver: local
