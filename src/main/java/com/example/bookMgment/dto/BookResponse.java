@@ -1,52 +1,49 @@
-package com.example.bookMgment.dto;
+package com.example.bookmanagement.dto;
 
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.processing.Pattern;
+import java.time.LocalDateTime;
 
 /**
- * DTO FOR REQUESTS: Used when client sends data to create/update a book.
+ * DTO FOR RESPONSES: Used when sending book data back to client.
  *
- * WHY DTO?
- * 1. Security: Never expose entity directly to client
- * 2. Validation: Can add validation annotations without affecting entity
- * 3. Flexibility: Can have different fields than entity
- * 4. Decoupling: Changes in entity don't affect API contract
+ * WHY BUILDER PATTERN?
+ * - Provides flexible object creation
+ * - Makes code more readable
+ * - Immutable objects (thread-safe)
  */
 @Data
+@Builder  // Enables Builder pattern: BookResponse.builder().id(1L).title("...").build()
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookRequest {
+public class BookResponse {
 
-    @NotBlank(message = "Title is required")  // Validation: Cannot be null or empty
-    @Size(min = 2, max = 200, message = "Title must be between 2 and 200 characters")
+    private Long id;  // We expose ID in response so client can reference the book
+
     private String title;
 
-    @NotBlank(message = "Author is required")
-    @Size(min = 2, max = 100, message = "Author name must be between 2 and 100 characters")
     private String author;
 
-    @Pattern(regexp = "^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$",
-            message = "Invalid ISBN format")
     private String isbn;
 
-    @Min(value = 1000, message = "Publication year must be at least 1000")
-    @Max(value = 2024, message = "Publication year cannot be in the future")
     private Integer publicationYear;
 
     private String publisher;
 
-    @NotNull(message = "Price is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
-    @DecimalMax(value = "10000.0", message = "Price cannot exceed 10000")
     private Double price;
 
-    @Min(value = 1, message = "Book must have at least 1 page")
-    @Max(value = 10000, message = "Book cannot have more than 10000 pages")
     private Integer totalPages;
 
-    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
+
+    private LocalDateTime createdAt;  // Audit fields for transparency
+
+    private LocalDateTime updatedAt;
+
+    /**
+     * Note: We don't include sensitive data here
+     * If we had fields like "internalNotes", we would NOT expose them
+     */
 }
