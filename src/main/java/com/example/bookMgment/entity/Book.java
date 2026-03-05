@@ -1,9 +1,9 @@
+package com.example.bookMgment.entity;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-
 import java.time.LocalDateTime;
 
 /**
@@ -21,8 +21,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor  // Generates a constructor with all arguments
 public class Book {
 
-    @Id  // Marks this field as the primary key
+    @Id  // CORRECT: Using jakarta.persistence.Id, NOT org.springframework.data.annotation.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // Database will auto-generate the ID
+    @Column(name = "id")
     private Long id;
 
     @Column(nullable = false, length = 200)  // Maps to database column with NOT NULL constraint
