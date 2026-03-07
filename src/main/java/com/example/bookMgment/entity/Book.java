@@ -6,39 +6,29 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-/**
- * ENTITY CLASS: Represents the database table structure.
- * Entity classes are directly mapped to database tables.
- * They contain JPA annotations that define the database schema.
- *
- * WHY WE NEED THIS: This is the internal representation of our data that matches
- * the database structure. It should NEVER be exposed directly to the client.
- */
-@Entity  // Marks this class as a JPA entity (will be mapped to a database table)
-@Table(name = "books")  // Specifies the table name in the database
-@Data  // Lombok annotation that generates getters, setters, toString, equals, hashCode
-@NoArgsConstructor  // Generates a no-args constructor (required by JPA)
-@AllArgsConstructor  // Generates a constructor with all arguments
+@Entity
+@Table(name = "books")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Book {
 
-    @Id  // CORRECT: Using jakarta.persistence.Id, NOT org.springframework.data.annotation.Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Database will auto-generate the ID
-    @Column(name = "id")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 200)  // Maps to database column with NOT NULL constraint
+    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private String author;
 
-    @Column(unique = true, length = 20)  // UNIQUE constraint in database
-    private String isbn;  // International Standard Book Number
+    @Column(unique = true)
+    private String isbn;
 
     @Column(name = "publication_year")
     private Integer publicationYear;
 
-    @Column(length = 50)
     private String publisher;
 
     @Column(nullable = false)
@@ -51,43 +41,19 @@ public class Book {
     private String description;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;  // Timestamp when record was created
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;  // Timestamp when record was last updated
+    private LocalDateTime updatedAt;
 
-    /**
-     * JPA Lifecycle Callback Methods
-     * These methods are automatically called by JPA at specific points in the entity's lifecycle
-     */
-
-    /**
-     * @PrePersist - Executed before the entity is persisted (inserted) to database
-     * Used to set audit fields automatically
-     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * @PreUpdate - Executed before the entity is updated in database
-     * Updates the last modified timestamp
-     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    /**
-     * IMPORTANT: Notice that we don't have any business logic here.
-     * Entities should only contain:
-     * 1. Fields mapping to database columns
-     * 2. JPA annotations
-     * 3. Lifecycle callback methods
-     * 4. Basic validation annotations
-     *
-     * Business logic belongs in the Service layer!
-     */
 }
