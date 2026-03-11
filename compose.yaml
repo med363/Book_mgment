@@ -12,7 +12,7 @@ services:
       MYSQL_PASSWORD: bookpassword
       TZ: UTC
     ports:
-      - "3307:3306"
+      - "3307:3306"  # Note: using 3307 on host
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -34,7 +34,8 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/book_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      # Use host.docker.internal for Mac/Windows, or 172.17.0.1 for Linux
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3307/book_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: bookuser
       SPRING_DATASOURCE_PASSWORD: bookpassword
     ports:
@@ -43,6 +44,8 @@ services:
       - book-network
     volumes:
       - ./logs:/app/logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # For Linux compatibility
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
       interval: 30s

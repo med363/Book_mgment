@@ -1,9 +1,13 @@
 package com.example.bookMgment.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * Thrown when a requested resource is not found in the database
  * HTTP Status: 404 Not Found
  */
+@ResponseStatus(HttpStatus.NOT_FOUND)
 public class ResourceNotFoundException extends RuntimeException {
 
     /**

@@ -21,7 +21,11 @@ server:
     context-path: /api
 
 logging:
-  file:
-    name: /app/logs/application.log
   level:
-    com.example.bookMgment: INFO
+    org.springframework.boot: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: DEBUG
+    org.springframework.context.annotation: DEBUG
+    com.example.bookMgment: DEBUG
+
+
