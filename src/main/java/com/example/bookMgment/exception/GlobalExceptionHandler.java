@@ -11,11 +11,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Global exception handler for the application.
+ * Intercepts exceptions thrown by controllers and returns structured JSON responses.
+ * Uses @RestControllerAdvice to apply globally to all controllers.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handles validation errors (e.g., @Valid failures).
+     * Returns a 400 Bad Request with a map of field names and error messages.
+     * 
+     * @param ex The exception containing validation results.
+     * @return structured error response.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        // Collect all field errors into a map
         Map<String, String> errors = ex.getBindingResult().getAllErrors().stream()
                 .collect(Collectors.toMap(
                         error -> ((FieldError) error).getField(),
@@ -31,6 +44,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles DuplicateIsbnException.
+     * Returns a 409 Conflict status.
+     * 
+     * @param ex The duplicate ISBN exception.
+     * @return structured error response.
+     */
     @ExceptionHandler(DuplicateIsbnException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateIsbnException(DuplicateIsbnException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -40,6 +60,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
+    /**
+     * Handles ResourceNotFoundException.
+     * Returns a 404 Not Found status.
+     * 
+     * @param ex The resource not found exception.
+     * @return structured error response.
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -49,6 +76,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Catch-all handler for any other unhandled exceptions.
+     * Returns a 500 Internal Server Error status.
+     * 
+     * @param ex The unhandled exception.
+     * @return structured error response.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
         Map<String, Object> response = new HashMap<>();

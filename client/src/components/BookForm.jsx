@@ -4,12 +4,27 @@ import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from './ui/Card';
 
+/**
+ * Validates and submits book data.
+ * Used for both creating new books and editing existing ones.
+ * 
+ * @param {Object} props
+ * @param {Object} props.initialData - Initial values for the form (for editing).
+ * @param {Function} props.onSubmit - Callback function when form is valid and submitted.
+ * @param {Function} props.onCancel - Callback function when cancel button is clicked.
+ * @param {boolean} props.isLoading - Whether the submission process is ongoing.
+ * @param {boolean} props.isEditing - Whether the form is in 'edit' mode or 'create' mode.
+ */
 export function BookForm({ initialData = {}, onSubmit, onCancel, isLoading, isEditing }) {
+  
+  // React Hook Form setup
+  // registers input fields and handles validation and submission
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       title: initialData.title || '',
       author: initialData.author || '',
       isbn: initialData.isbn || '',
+      // Default to current year if creating new
       publicationYear: initialData.publicationYear || new Date().getFullYear(),
       publisher: initialData.publisher || '',
       price: initialData.price || 0.0,
@@ -24,50 +39,86 @@ export function BookForm({ initialData = {}, onSubmit, onCancel, isLoading, isEd
         <CardTitle>{isEditing ? 'Edit Book' : 'Add New Book'}</CardTitle>
         <CardDescription>Enter the book details below.</CardDescription>
       </CardHeader>
+      
+      {/* Form Submission Handler */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
+          
+          {/* Title Field - Required, Min Length 2 */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Title</label>
-            <Input {...register('title', { required: 'Title is required', minLength: { value: 2, message: 'Min length 2' } })} placeholder="Clean Code" />
+            <Input 
+              {...register('title', { required: 'Title is required', minLength: { value: 2, message: 'Min length 2' } })} 
+              placeholder="Clean Code" 
+            />
             {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            {/* Author Field - Required */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Author</label>
-              <Input {...register('author', { required: 'Author is required' })} placeholder="Robert C. Martin" />
+              <Input 
+                {...register('author', { required: 'Author is required' })} 
+                placeholder="Robert C. Martin" 
+              />
               {errors.author && <p className="text-sm text-destructive">{errors.author.message}</p>}
             </div>
+            
+            {/* ISBN Field - Required */}
             <div className="space-y-2">
               <label className="text-sm font-medium">ISBN</label>
-              <Input {...register('isbn', { required: 'ISBN is required' })} placeholder="978-0132350884" />
+              <Input 
+                {...register('isbn', { required: 'ISBN is required' })} 
+                placeholder="978-0132350884" 
+              />
               {errors.isbn && <p className="text-sm text-destructive">{errors.isbn.message}</p>}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+             {/* Year Field - Number, Range 1000-2026 */}
              <div className="space-y-2">
               <label className="text-sm font-medium">Year</label>
-              <Input type="number" {...register('publicationYear', { valueAsNumber: true, min: 1000, max: 2026 })} />
+              <Input 
+                type="number" 
+                {...register('publicationYear', { valueAsNumber: true, min: 1000, max: 2026 })} 
+              />
             </div>
+            
+            {/* Publisher Field - Optional */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Publisher</label>
-              <Input {...register('publisher')} placeholder="Prentice Hall" />
+              <Input 
+                {...register('publisher')} 
+                placeholder="Prentice Hall" 
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            {/* Price Field - Required, Number, Min 0 */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Price ($)</label>
-              <Input type="number" step="0.01" {...register('price', { valueAsNumber: true, required: 'Price is required', min: 0 })} />
+              <Input 
+                type="number" 
+                step="0.01" 
+                {...register('price', { valueAsNumber: true, required: 'Price is required', min: 0 })} 
+              />
               {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
             </div>
+            
+             {/* Pages Field - Number, Min 1 */}
              <div className="space-y-2">
               <label className="text-sm font-medium">Pages</label>
-              <Input type="number" {...register('totalPages', { valueAsNumber: true, min: 1 })} />
+              <Input 
+                type="number" 
+                {...register('totalPages', { valueAsNumber: true, min: 1 })} 
+              />
             </div>
           </div>
 
+          {/* Description Field - Textarea */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Description</label>
             <textarea
@@ -77,6 +128,8 @@ export function BookForm({ initialData = {}, onSubmit, onCancel, isLoading, isEd
             />
           </div>
         </CardContent>
+        
+        {/* Footer Actions */}
         <CardFooter className="flex justify-between">
           <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
           <Button type="submit" isLoading={isLoading}>{isEditing ? 'Update Book' : 'Create Book'}</Button>
