@@ -18,8 +18,8 @@ public class BookRequest {
     @Size(min = 2, max = 100)
     private String author;
 
-    @Pattern(regexp = "^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$",
-            message = "Invalid ISBN format")
+    @NotBlank(message = "ISBN is required")
+    @Size(min = 10, max = 20, message = "ISBN must be between 10 and 20 characters")
     private String isbn;
 
     @Min(1000)
